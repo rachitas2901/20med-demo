@@ -48,7 +48,7 @@ param avdWorkspaces = [
     loadBalancerType: 'DepthFirst'
     fslogixShareName: 'de-fslogix'
     fslogixShareQuota: 100
-    accessGroupObjectId: ''
+    accessGroupObjectId: 'e1f662cd-87be-4736-b9a3-3585e5000640'
     approvedApplicationFqdns: [
       'github.com'
       '*.github.com'
@@ -183,7 +183,7 @@ param logAnalyticsWorkspaceName = 'law-20med-avd-prod-cin'
 param logAnalyticsRetentionDays = 30
 
 param adminGroupObjectId = ''
-param wvdServicePrincipalObjectId = ''
+param wvdServicePrincipalObjectId = 'a371b088-d6e2-4b68-b8d2-801090fbbff7'
 
 param enablePrivateEndpoints = true
 param enableUat = false
