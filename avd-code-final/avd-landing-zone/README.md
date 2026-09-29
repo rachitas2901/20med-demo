@@ -12,7 +12,7 @@ rg-20med-network-hub-prod-cin
 
 rg-20med-avd-prod-cin
   vnet-20med-avd-prod-cin          10.10.0.0/16
-    snet-avd-de                    10.10.1.0/24     HP-DataEngineering, 1 x Standard_D4s_v5
+    snet-avd-de                    10.10.1.0/24     HP-DataEngineering, 1 x Standard_E4s_v5
     snet-privateendpoint           10.10.10.0/24    Azure Files private endpoint
     snet-management                10.10.11.0/24    reserved, no jump host, no Bastion
   de-fslogix                       Standard_LRS quota 100 GiB, Entra Kerberos

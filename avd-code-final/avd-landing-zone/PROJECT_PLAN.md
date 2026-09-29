@@ -7,7 +7,7 @@ Only the Data Engineering workspace is enabled. Prospecting, Sales, Reference Da
 | 1 | Assessment and planning | 18 | Approved address plan, SKU check, access list |
 | 2 | IaC and pipeline | 44 | Bicep modules, GitHub repo, what-if on pull request, production approval |
 | 3 | Azure foundation | 22 | Hub from main-hub.bicep, Firewall Basic, then the spoke and Log Analytics |
-| 4 | Workspace | 46 | Data Engineering host pool in the prod spoke, one D4s v5 host, Start VM on Connect |
+| 4 | Workspace | 46 | Data Engineering host pool in the prod spoke, one E4s v5 host, Start VM on Connect |
 | 5 | Profiles | 17 | `de-fslogix` share and private endpoint |
 | 6 | Firewall and session controls | 34 | Deny-by-default egress through the hub firewall, approved FQDNs, redirection locked down |
 | 7 | Monitoring and cost | 22 | Firewall diagnostics, 30 day retention, deallocation checks |
