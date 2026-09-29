@@ -53,7 +53,20 @@ Cross-resource-group writes use custom roles. Built-in Network Contributor on th
 | Create this spoke's hub-side peering | Hub VNet | `Microsoft.Network/virtualNetworks/read`, `Microsoft.Network/virtualNetworks/peer/action`, `Microsoft.Network/virtualNetworks/virtualNetworkPeerings/read`, `write`, `delete` | `vnet-20med-hub-prod-cin` | Custom role. Do not use Network Contributor here |
 | Create this spoke's rule collection groups | Firewall policy | `Microsoft.Network/firewallPolicies/read`, `Microsoft.Network/firewallPolicies/ruleCollectionGroups/read`, `write`, `delete` | `afwp-20med-prod-cin` | Custom role. Do not include `firewallPolicies/write` or `azureFirewalls/write` |
 
-These roles are not created by the Bicep templates.
+These pipeline roles are not created by the Bicep templates. They are already assigned to `github-20med-demo` on the subscription.
+
+## Workload role assignments
+
+The spoke template creates these assignments when the object IDs in `parameters/spoke.prod.bicepparam` are set:
+
+| Role | Principal | Scope |
+|---|---|---|
+| Desktop Virtualization User | `SG-AVD-DataEngineering` | Data Engineering application group |
+| Virtual Machine User Login | `SG-AVD-DataEngineering` | Spoke resource group |
+| Storage File Data SMB Share Contributor | `SG-AVD-DataEngineering` | `de-fslogix` |
+| Desktop Virtualization Power On Off Contributor | Azure Virtual Desktop enterprise app | Spoke resource group |
+
+Disabled workspaces have an empty `accessGroupObjectId`, so they receive none of these assignments. Storage File Data SMB Share Elevated Contributor is not assigned. Share-root ACL still has to be set after the storage account exists.
 
 ## Firewall private IP
 
