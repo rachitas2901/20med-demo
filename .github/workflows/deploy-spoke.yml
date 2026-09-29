@@ -1,0 +1,58 @@
+name: Deploy spoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: avd-spoke-deploy
+  cancel-in-progress: false
+
+env:
+  TEMPLATE_FILE: avd-code-final/avd-landing-zone/main-spoke.bicep
+  PARAMETER_FILE: avd-code-final/avd-landing-zone/parameters/spoke.prod.bicepparam
+  DEPLOYMENT_LOCATION: centralindia
+
+jobs:
+  deploy:
+    name: Deploy AVD spoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Bicep
+        run: az bicep install
+
+      - name: Confirm subscription and tenant
+        env:
+          EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          EXPECTED_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          EXPECTED_SUBSCRIPTION_NAME: ${{ vars.EXPECTED_SUBSCRIPTION_NAME }}
+        run: bash .github/scripts/assert-azure-context.sh
+
+      - name: Confirm the shared hub exists
+        run: bash .github/scripts/assert-hub-exists.sh
+
+      - name: Deploy spoke template
+        env:
+          AVD_LOCAL_ADMIN_PASSWORD: ${{ secrets.AVD_LOCAL_ADMIN_PASSWORD }}
+        run: |
+          az deployment sub create \
+            --location "$DEPLOYMENT_LOCATION" \
+            --template-file "$TEMPLATE_FILE" \
+            --parameters "$PARAMETER_FILE" \
+            --name "avd-spoke-prod-${GITHUB_SHA}" \
+            --no-prompt

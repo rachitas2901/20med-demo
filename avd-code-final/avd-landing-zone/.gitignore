@@ -1,0 +1,3 @@
+# Local Bicep compile output
+*.json
+!bicepconfig.json

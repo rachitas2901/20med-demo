@@ -1,0 +1,88 @@
+name: Validate spoke
+
+on:
+  pull_request:
+    paths:
+      - avd-code-final/avd-landing-zone/main-spoke.bicep
+      - avd-code-final/avd-landing-zone/parameters/spoke.prod.bicepparam
+      - avd-code-final/avd-landing-zone/modules/avd/**
+      - avd-code-final/avd-landing-zone/modules/storage/**
+      - avd-code-final/avd-landing-zone/modules/monitoring/**
+      - avd-code-final/avd-landing-zone/modules/network/spokeVnet.bicep
+      - avd-code-final/avd-landing-zone/modules/network/subnet.bicep
+      - avd-code-final/avd-landing-zone/modules/network/nsg.bicep
+      - avd-code-final/avd-landing-zone/modules/network/routeTable.bicep
+      - avd-code-final/avd-landing-zone/modules/network/peering.bicep
+      - avd-code-final/avd-landing-zone/modules/security/spokeFirewallRules.bicep
+      - .github/workflows/validate-spoke.yml
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: avd-spoke-validate-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TEMPLATE_FILE: avd-code-final/avd-landing-zone/main-spoke.bicep
+  PROD_PARAMETERS: avd-code-final/avd-landing-zone/parameters/spoke.prod.bicepparam
+  DEPLOYMENT_LOCATION: centralindia
+
+jobs:
+  build:
+    name: Build spoke template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bicep
+        uses: azure/setup-bicep@v2
+
+      - name: Compile spoke template and parameters
+        env:
+          AVD_LOCAL_ADMIN_PASSWORD: placeholder
+        run: |
+          bicep build "$TEMPLATE_FILE" --outfile "$RUNNER_TEMP/main-spoke.json"
+          bicep build-params "$PROD_PARAMETERS" --outfile "$RUNNER_TEMP/spoke.prod.parameters.json"
+
+  what-if:
+    name: Preview prod spoke
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Bicep
+        run: az bicep install
+
+      - name: Confirm subscription and tenant
+        env:
+          EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          EXPECTED_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          EXPECTED_SUBSCRIPTION_NAME: ${{ vars.EXPECTED_SUBSCRIPTION_NAME }}
+        run: bash .github/scripts/assert-azure-context.sh
+
+      - name: Confirm the shared hub exists
+        run: bash .github/scripts/assert-hub-exists.sh
+
+      - name: What-if prod spoke
+        env:
+          AVD_LOCAL_ADMIN_PASSWORD: ${{ secrets.AVD_LOCAL_ADMIN_PASSWORD }}
+        run: |
+          az deployment sub what-if \
+            --location "$DEPLOYMENT_LOCATION" \
+            --template-file "$TEMPLATE_FILE" \
+            --parameters "$PROD_PARAMETERS" \
+            --name "avd-spoke-prod-whatif-${GITHUB_RUN_ID}" \
+            --no-prompt

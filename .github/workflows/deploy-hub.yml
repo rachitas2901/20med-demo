@@ -1,0 +1,53 @@
+name: Deploy hub
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: avd-hub-deploy
+  cancel-in-progress: false
+
+env:
+  TEMPLATE_FILE: avd-code-final/avd-landing-zone/main-hub.bicep
+  HUB_PARAMETERS: avd-code-final/avd-landing-zone/parameters/hub.prod.bicepparam
+  DEPLOYMENT_LOCATION: centralindia
+
+jobs:
+  deploy:
+    name: Deploy shared hub
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: hub-production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Bicep
+        run: az bicep install
+
+      - name: Confirm subscription and tenant
+        env:
+          EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          EXPECTED_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          EXPECTED_SUBSCRIPTION_NAME: ${{ vars.EXPECTED_SUBSCRIPTION_NAME }}
+        run: bash .github/scripts/assert-azure-context.sh
+
+      - name: Deploy hub template
+        run: |
+          az deployment sub create \
+            --location "$DEPLOYMENT_LOCATION" \
+            --template-file "$TEMPLATE_FILE" \
+            --parameters "$HUB_PARAMETERS" \
+            --name "avd-hub-${GITHUB_SHA}" \
+            --no-prompt
