@@ -63,6 +63,7 @@ var fileHost = '${fslogixStorageAccountName}.file.core.windows.net'
 var fslogixUnc = '\\\\${fileHost}\\${pool.fslogixShareName}'
 var fslogixCommand = join([
   'powershell.exe -ExecutionPolicy Unrestricted -NoProfile -Command "'
+  'New-Item -Path \'HKLM:\\SOFTWARE\\Microsoft\\RDInfraAgent\\AADJPrivate\' -Force | Out-Null; '
   'New-Item -Path \'HKLM:\\SOFTWARE\\FSLogix\\Profiles\' -Force | Out-Null; '
   'New-ItemProperty -Path \'HKLM:\\SOFTWARE\\FSLogix\\Profiles\' -Name \'Enabled\' -Value 1 -PropertyType DWord -Force | Out-Null; '
   'New-ItemProperty -Path \'HKLM:\\SOFTWARE\\FSLogix\\Profiles\' -Name \'AccessNetworkAsComputerObject\' -Value 0 -PropertyType DWord -Force | Out-Null; '
@@ -207,10 +208,25 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = [for (i, idx) in in
   }
 }]
 
+resource aadLogin 'Microsoft.Compute/virtualMachines/extensions@2024-07-01' = [for (i, idx) in indices: {
+  parent: vm[idx]
+  name: 'AADLoginForWindows'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Azure.ActiveDirectory'
+    type: 'AADLoginForWindows'
+    typeHandlerVersion: '2.2'
+    autoUpgradeMinorVersion: true
+  }
+}]
+
 resource avdAgent 'Microsoft.Compute/virtualMachines/extensions@2024-07-01' = [for (i, idx) in indices: {
   parent: vm[idx]
   name: 'AVDAgentDSC'
   location: location
+  dependsOn: [
+    aadLogin[idx]
+  ]
   properties: {
     publisher: 'Microsoft.Powershell'
     type: 'DSC'
