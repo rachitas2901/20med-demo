@@ -122,6 +122,11 @@ resource hubFirewall 'Microsoft.Network/azureFirewalls@2024-05-01' existing = {
   scope: hubRg
 }
 
+resource hubFirewallPolicy 'Microsoft.Network/firewallPolicies@2024-05-01' existing = {
+  name: firewallPolicyName
+  scope: hubRg
+}
+
 resource avdRg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: avdResourceGroupName
   location: location
@@ -378,7 +383,7 @@ output avdResourceGroupName string = avdRg.name
 output hubVnetId string = hubVnet.id
 output spokeVnetId string = spokeNetwork.outputs.vnetId
 output firewallPrivateIp string = hubFirewall.properties.ipConfigurations[0].properties.privateIPAddress
-output firewallPolicyId string = resourceId(hubResourceGroupName, 'Microsoft.Network/firewallPolicies', firewallPolicyName)
+output firewallPolicyId string = hubFirewallPolicy.id
 output enabledWorkspaceKeys array = map(enabledWorkspaces, ws => ws.key)
 output disabledWorkspaceKeys array = map(filter(avdWorkspaces, ws => !ws.enabled), ws => ws.key)
 output fslogixShareNames array = storage.outputs.shareNames
