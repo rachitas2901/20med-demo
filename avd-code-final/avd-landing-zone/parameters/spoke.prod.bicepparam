@@ -40,7 +40,7 @@ param avdWorkspaces = [
     hostPoolName: 'HP-DataEngineering'
     workspaceName: 'WS-DataEngineering'
     applicationGroupName: 'DAG-DataEngineering'
-    vmSize: 'Standard_E4s_v5'
+    vmSize: 'Standard_D2s_v5'
     osDiskType: 'StandardSSD_LRS'
     osDiskSizeGb: 128
     sessionHostCount: 1
