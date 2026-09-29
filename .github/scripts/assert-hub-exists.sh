@@ -21,7 +21,8 @@ if ! az network firewall show --resource-group "${hub_rg}" --name "${firewall_na
   exit 1
 fi
 
-firewall_ip="$(az network firewall show --resource-group "${hub_rg}" --name "${firewall_name}" --query "ipConfigurations[0].privateIpAddress" -o tsv)"
+subscription_id="$(az account show --query id -o tsv)"
+firewall_ip="$(az rest --method get --url "https://management.azure.com/subscriptions/${subscription_id}/resourceGroups/${hub_rg}/providers/Microsoft.Network/azureFirewalls/${firewall_name}?api-version=2024-05-01" --query "properties.ipConfigurations[0].properties.privateIPAddress" -o tsv)"
 if [[ -z "${firewall_ip}" || "${firewall_ip}" == "None" ]]; then
   echo "Firewall ${firewall_name} has no data-plane private IP on ipConfigurations[0]. Refusing the spoke run."
   exit 1
