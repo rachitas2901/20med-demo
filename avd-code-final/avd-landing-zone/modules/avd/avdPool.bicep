@@ -89,7 +89,7 @@ resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2024-04-03' = {
     startVMOnConnect: true
     validationEnvironment: enableUat
     preferredAppGroupType: 'Desktop'
-    customRdpProperty: 'drivestoredirect:s:;usbdevicestoredirect:s:;devicestoredirect:s:;camerastoredirect:s:;redirectprinters:i:0;redirectclipboard:i:0;redirectcomports:i:0;redirectsmartcards:i:0;audiomode:i:0;targetisaadjoined:i:1;enablerdsaadauth:i:1;enablecredsspsupport:i:0;'
+    customRdpProperty: 'drivestoredirect:s:;usbdevicestoredirect:s:;devicestoredirect:s:;camerastoredirect:s:;redirectprinters:i:0;redirectclipboard:i:0;redirectcomports:i:0;redirectsmartcards:i:1;redirectwebauthn:i:1;audiomode:i:0;targetisaadjoined:i:1;enablerdsaadauth:i:1;enablecredsspsupport:i:0;'
     registrationInfo: {
       expirationTime: registrationTokenExpiration
       registrationTokenOperation: 'Update'
