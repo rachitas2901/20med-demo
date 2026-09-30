@@ -64,6 +64,8 @@ var fslogixUnc = '\\\\${fileHost}\\${pool.fslogixShareName}'
 var fslogixCommand = join([
   'powershell.exe -ExecutionPolicy Unrestricted -NoProfile -Command "'
   'New-Item -Path \'HKLM:\\SOFTWARE\\Microsoft\\RDInfraAgent\\AADJPrivate\' -Force | Out-Null; '
+  'New-Item -Path \'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\pku2u\' -Force | Out-Null; '
+  'New-ItemProperty -Path \'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\pku2u\' -Name \'AllowOnlineID\' -Value 1 -PropertyType DWord -Force | Out-Null; '
   'New-Item -Path \'HKLM:\\SOFTWARE\\FSLogix\\Profiles\' -Force | Out-Null; '
   'New-ItemProperty -Path \'HKLM:\\SOFTWARE\\FSLogix\\Profiles\' -Name \'Enabled\' -Value 1 -PropertyType DWord -Force | Out-Null; '
   'New-ItemProperty -Path \'HKLM:\\SOFTWARE\\FSLogix\\Profiles\' -Name \'AccessNetworkAsComputerObject\' -Value 0 -PropertyType DWord -Force | Out-Null; '
@@ -87,7 +89,7 @@ resource hostPool 'Microsoft.DesktopVirtualization/hostPools@2024-04-03' = {
     startVMOnConnect: true
     validationEnvironment: enableUat
     preferredAppGroupType: 'Desktop'
-    customRdpProperty: 'drivestoredirect:s:;usbdevicestoredirect:s:;devicestoredirect:s:;camerastoredirect:s:;redirectprinters:i:0;redirectclipboard:i:0;redirectcomports:i:0;redirectsmartcards:i:0;audiomode:i:0;targetisaadjoined:i:1;enablerdsaadauth:i:1;'
+    customRdpProperty: 'drivestoredirect:s:;usbdevicestoredirect:s:;devicestoredirect:s:;camerastoredirect:s:;redirectprinters:i:0;redirectclipboard:i:0;redirectcomports:i:0;redirectsmartcards:i:0;audiomode:i:0;targetisaadjoined:i:1;enablerdsaadauth:i:1;enablecredsspsupport:i:0;'
     registrationInfo: {
       expirationTime: registrationTokenExpiration
       registrationTokenOperation: 'Update'
